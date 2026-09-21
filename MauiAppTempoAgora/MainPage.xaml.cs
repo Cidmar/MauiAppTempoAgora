@@ -1,4 +1,6 @@
-﻿namespace MauiAppTempoAgora
+﻿using MauiAppTempoAgora.Models;
+
+namespace MauiAppTempoAgora
 {
     public partial class MainPage : ContentPage
     {
@@ -9,16 +11,49 @@
             InitializeComponent();
         }
 
-        private void OnCounterClicked(object? sender, EventArgs e)
+        private async void btn_buscar_Clicked(object sender, EventArgs e)
         {
-            count++;
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(txt_cidade.Text))
+                    {
+                        Tempo? t = await Services.DataService.GetPrevisao(txt_cidade.Text);
 
-            if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
+                        if (t != null)
+                        {
+                            string dados_previsao = "";
 
-            SemanticScreenReader.Announce(CounterBtn.Text);
+                            dados_previsao = $"\nLatitude: " + t.lat +
+                                              $"\nLongitude: " + t.lon +
+                                              $"\nDescrição: " + t.description +
+                                              $"\nTemperatura mínima: " + t.temp_min + " °C" +
+                                              $"\nTemperatura máxima: " + t.temp_max + " °C" +
+                                              $"\nVelocidade do vento: " + t.speed + " m/s" +
+                                              $"\nVisibilidade: " + t.visibility + " metros" +
+                                              $"\nNascer do sol: " + t.sunrise +
+                                              $"\nPôr do sol: " + t.sunset;
+
+                            lbl_resultado.Text = dados_previsao;
+                        }
+
+                        else
+                        {
+                            lbl_resultado.Text = "Não foi possível obter a previsão do tempo.";
+                        }
+                    }
+                    else
+                    {
+                        lbl_resultado.Text = "Preencha o campo cidade";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlertAsync("Erro", ex.Message, "OK");
+                }
+
+            }
         }
     }
 }
